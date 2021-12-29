@@ -104,26 +104,37 @@ void Game::start()
 	if(!_silent)
 		_board.printBoard(_points, _lives);
 	
-	char key = 's';
+	char key = 'p', temp;
 	bool rungame = true;
 	bool ghostturn = false;
 	bool firstMove = true;
 	bool fruitturn = false;
-  
-	int i;
+	int i, fileTime;
+	if (argument[0] == LOAD_GAME)
+		key='s';
 
 	while (rungame) {  //every iteration is a new move for pacman - meaning he moved spots (or stayed in his spot if user pressed 's')
 		if(!_silent)
 			Sleep(100);
+		if (argument[0] != LOAD_GAME)
+			userDirection(key);
 
-		userDirection(key);
 		if (!_pause) {
-			_board.updateStats(_points, _lives);
+			if(!_silent)
+				_board.updateStats(_points, _lives);
 
 			if (_fruit.timetodrop())
 			{
-				dropFruit();
+				if (argument[0] == LOAD_GAME)
+					setFruitFromFile(fsteps);
+				else
+					dropFruit();
 				_fruit.changestate();
+				if (argument[0] == SAVE_GAME)
+					setFruitFromFile(fsteps);
+
+				if(!_silent)
+				cout << _fruit.getSymbol() << endl;
 			}
 
 			if (_fruit.timesup())
@@ -139,18 +150,30 @@ void Game::start()
 				_fruit.changestate();
 			}
 			if (fruitturn && _fruit.getState()) {
-				_fruit.getRandDirection(_fruit.getPosition(), _pacman.getPosition(), FRUIT, _board);
+				if (argument[0] == LOAD_GAME) {
+					fsteps >> temp;
+					_fruit.setDirection(temp);
+				}
+				else
+					_fruit.getRandDirection(_fruit.getPosition(), _pacman.getPosition(), FRUIT, _board);
 				_fruit.moveGameObject(_fruit.getPosition(), _fruit.getDirection(), _fruit.getSymbol(), _board);
+
+				if (argument[0] == SAVE_GAME)
+					fsteps << _fruit.getDirection() << " ";
 			}
 
-			if (key != 's') {
+			if (key != 'p') {
+				if (argument[0] == LOAD_GAME)
+					fsteps >> key;
 				_pacman.moveGameObject(_pacman.getPosition(), key, symbols[(int)symbols::PACMAN_CHAR], _board);
+				if (argument[0] == SAVE_GAME)
+					fsteps << key << " ";
 				++_gameTime;
 				if (_board.getSpot(_pacman.getPosition().getX(), _pacman.getPosition().getY()) == symbols[(int)symbols::BREADCRUMB_CHAR]) {
 					_board.setSpot(_pacman.getPosition().getX(), _pacman.getPosition().getY(), symbols[(int)symbols::EMPTY_SPACE_CHAR]);
 					_points++;
 					_currBreadcrumbs++;
-			}
+				}
 				firstMove = false;
 			}
 
@@ -159,8 +182,16 @@ void Game::start()
 
 			if (ghostturn && !firstMove) {
 				for (i = 0; i < _ghostCounter; ++i) {
-					_ghosts[i].getRandDirection(_ghosts[i].getPosition(), _pacman.getPosition(), _difficulty, _board);
+					if (argument[0] == LOAD_GAME) {
+						fsteps >> temp;
+						_ghosts[i].setDirection(temp);
+					}
+					else
+						_ghosts[i].getRandDirection(_ghosts[i].getPosition(), _pacman.getPosition(), _difficulty, _board);
 					_ghosts[i].moveGameObject(_ghosts[i].getPosition(), _ghosts[i].getDirection(), symbols[(int)symbols::GHOST_CHAR], _board);
+
+					if (argument[0] == SAVE_GAME)
+						fsteps << _ghosts[i].getDirection() << " ";
 
 				}
 				fruitturn = !fruitturn;
@@ -187,20 +218,40 @@ void Game::start()
 		for (i = 0; i < _ghostCounter; ++i)
 			if (comparePosition(_pacman.getPosition(), _ghosts[i].getPosition())) {
 				_lives--;
+				if (argument[0] == SAVE_GAME) { 
+					fresults << DEAD << " ";
+					fresults << _gameTime << " ";
+				}
+				if (_silent) {
+					fresults >> temp;
+					fresults >> fileTime;
+					if (_gameTime != fileTime || temp != DEAD) {
+						cout << "Test Fail" << endl;
+						return;
+					}
+				}
+				
 				_fruit.changestate();
 				_fruit.resettimer();
 				_board.printBoard(_points, _lives);
 				setInitialPositions();
 				firstMove = true;
-				key = 's';
+				key = 'p';
+				if (argument[0] == LOAD_GAME)
+					key = 's';
 			}
 		if (_lives == 0) {
+			fsteps.close();
+			fresults.close();
 			rungame = false;
 			_lives = 3;
 			system("cls");
-			cout << "--- Game Over ---\n" << endl;
-			fsteps.close();
-			fresults.close();
+			if (_silent) {
+				cout << "Test Passed" << endl;
+				return;
+			}
+			else
+				cout << "--- Game Over ---\n" << endl;
 			while (true)
 			{
 				if (_kbhit()) {
@@ -216,9 +267,29 @@ void Game::start()
 			fresults.close();
 			_boardCounter++;
 			system("cls");
+			if (argument[0] == SAVE_GAME) {
+				fresults << WIN << " ";
+				fresults << _gameTime << " ";
+			}
+			if (_silent) {
+				fresults >> temp;
+				fresults >> fileTime;
+				if (_gameTime != fileTime || temp != WIN) {
+					cout << "Test Fail" << endl;
+					return;
+				}
+			}
+
 			if (_boardCounter == _board.getNumberOfScreens()) {
 				rungame = false;
+
+				if (_silent) {
+					cout << "Test Passed" << endl;
+					return;
+				}
+				
 				cout << "--- You Win! ---\n" << endl;
+
 				while (true)
 				{
 					if (_kbhit()) {
@@ -231,8 +302,11 @@ void Game::start()
 			else {
 				_ghostCounter = 0;
 				_currBreadcrumbs = 0;
+				_gameTime = 0;
 				firstMove = true;
-				key = 's';
+				key = 'p';
+				if (argument[0] == LOAD_GAME)
+					key = 's';
 				_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
 				setNextGame();
 				_board.printBoard(_points, _lives);
@@ -246,20 +320,16 @@ void Game::start()
 //gets direction from user and checks if valid
 void Game::userDirection(char& key)
 {
-	if (argument[0] == LOAD_GAME)
-		key = 0; 
-	else {
-		char tempkey = 0;
-		if (_kbhit()) //If the user hit a key
-			tempkey = _getch();
-		tempkey = tolower(tempkey);
-		if (validUserInput(tempkey)) {
-			if (tempkey == ESC)
-				_pause = !_pause;
-			else {
-				if (!_pause)
-					key = tempkey;
-			}
+	char tempkey = 0;
+	if (_kbhit()) //If the user hit a key
+		tempkey = _getch();
+	tempkey = tolower(tempkey);
+	if (validUserInput(tempkey)) {
+		if (tempkey == ESC)
+			_pause = !_pause;
+		else {
+			if (!_pause)
+				key = tempkey;
 		}
 	}
 }
@@ -292,7 +362,6 @@ void Game::dropFruit()
 	} while (invalidFruitPosition(temp));
 
 	_board.gotoxy(temp.getX(), temp.getY());
-	cout << _fruit.getSymbol() << endl;
 	_fruit.setPosition(temp.getX(), temp.getY());
 
 
@@ -370,17 +439,36 @@ void Game::setFiles(fstream& steps, fstream& results, string fileName)
 	if (argument[0] == LOAD_GAME)
 		steps.open(s1, ios::in);
 	else
-		steps.open(s1);
+		steps.open(s1, ios::out);
 
 	s1.replace(s1.find("steps.txt"), 11, "results.txt");
 	if (argument[0] == LOAD_GAME)
 		results.open(s1, ios::in);
 	else
-		results.open(s1);
+		results.open(s1, ios::out);
 
 	if (!steps.is_open() || !results.is_open()) {
 		cout << "File Error" << endl;
 		return;
+	}
+}
+
+void Game::setFruitFromFile(fstream& steps)
+{
+	int temp;
+	if (argument[0] == LOAD_GAME) {
+		steps >> temp;
+		_fruit.setValue(temp);
+		_fruit.setSymbol(temp + '0');
+		steps >> temp;
+		_fruit.getPosition().setX(temp);
+		steps >> temp;
+		_fruit.getPosition().setY(temp);
+	}
+	else if (argument[0] == SAVE_GAME) {
+		steps << _fruit.getValue() << " ";
+		steps << _fruit.getPosition().getX() << " ";
+		steps << _fruit.getPosition().getY() << " ";
 	}
 }
 

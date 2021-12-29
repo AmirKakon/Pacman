@@ -28,6 +28,9 @@ Position& GameObject::getPosition()
 //moves object on board according to direction user pressed. and updates position of gameobject.
 void GameObject::moveGameObject(Position& p, char direction, char symbol, Board board)
 {
+	if (direction == 's')
+		return;
+
 	Position nextPosition(p);
 
 	updateDirection(nextPosition, direction);

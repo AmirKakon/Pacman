@@ -18,6 +18,8 @@
 #define LOAD_GAME "-load"
 #define SAVE_GAME "-save"
 #define Silent_GAME "[-silent]"
+#define DEAD 'D'
+#define WIN 'W'
 
 class Game
 {
@@ -56,6 +58,7 @@ public:
 	void getArgument(char* in);
 	int _gameTime = 0;
 	void setFiles(fstream& steps, fstream& results, string fileName);
+	void setFruitFromFile(fstream& steps);
 };
 
 #endif //!__GAME_H
