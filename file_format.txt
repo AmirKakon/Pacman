@@ -1,7 +1,14 @@
-w a d x s d a x s d 3 
+Steps:
+
+w a d x s d 3 a x s d
 
 Order:
 fruit -> pacman -> ghost1 -> ... -> ghost4 
 
 #:
 value of fruit
+
+
+Results: 
+
+00000

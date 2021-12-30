@@ -38,7 +38,7 @@ private:
 	int _ghostCounter = 0;
 	char _difficulty;
 	int _boardCounter = 0;
-	vector<string> argument;
+	vector<string> argument{""};
 	bool _silent = false;
 
 public:

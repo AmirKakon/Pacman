@@ -41,7 +41,7 @@ class GameObject
 		void resetTimer();
 		void updateTimer();
 		void setTimer(const char difficulty);
-		void setSilent(const bool silent);
+		void setSilent();
 };
 
 #endif // !__GAMEOBJECT_H

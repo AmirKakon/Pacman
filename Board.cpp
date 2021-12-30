@@ -14,11 +14,11 @@ void Board::updateStats(const int points,const int lives)
 //reads and updates board from a specific file
 int Board::readBoardFromFile(Position p[], int& count, string fileName)
 {
-	fstream f(fileName);
+	fstream f(fileName, ios::in);
+	
 	if (!checkFile(f)) {
 		return 0;
 	}
-	
 	char c;
 	int i = 0, j = 0;
 	int maxBreadCrumbs = 0;

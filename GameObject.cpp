@@ -256,7 +256,7 @@ void GameObject::setTimer(const char difficulty)
 		timer = 20;
 }
 
-void GameObject::setSilent(const bool silent)
+void GameObject::setSilent()
 {
-	_silent = silent;
+	_silent = true;
 }
