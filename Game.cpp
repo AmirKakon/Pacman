@@ -14,6 +14,8 @@ void Game::mainMenu()
 		_lives = 3;
 		_ghostCounter = 0;
 		_boardCounter = 0;
+		_board.clearScreens();
+
 		if (argument.size() > 1)
 			if (argument[1] == Silent_GAME && argument[0] == LOAD_GAME) {
 				_silent = true;
@@ -44,7 +46,21 @@ void Game::mainMenu()
 				break;
 			}
 			system("cls");
-			_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
+
+			try {
+				_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
+			}
+			catch (const char* message) {
+				cout << "Error: " << message << endl;
+				continue;
+			}
+			catch(int num)
+			{
+				cout << "Error: Fail to open file" << endl;
+				continue;
+			}
+
+			
 			if (!_maxBreadcrumbs)
 				break;
 			if(argument[0] != LOAD_GAME)
@@ -104,8 +120,18 @@ void Game::start()
 	fstream fsteps;
 	fstream fresults;
 
-	if (argument[0] == LOAD_GAME || argument[0] == SAVE_GAME)
-		setFiles(fsteps, fresults, _board.getScreen(_boardCounter));
+	if (argument[0] == LOAD_GAME || argument[0] == SAVE_GAME) {
+		try
+		{
+			setFiles(fsteps, fresults, _board.getScreen(_boardCounter));
+		}
+		catch (const char* message)
+		{
+			cout << message << endl;
+			return;
+		}
+	}
+		
 
 	if(!_silent)
 		_board.printBoard(_points, _lives);
@@ -437,6 +463,7 @@ string Game::getFileName()
 	cin.get();
 	string c;
 		getline(cin, c);
+		_board.addScreen(c);
 	return c;
 }
 
@@ -452,20 +479,28 @@ void Game::setFiles(fstream& steps, fstream& results, string fileName)
 {
 	string s1 = fileName;
 	s1.replace(s1.find("screen"), 9, "steps.txt");
-	if (argument[0] == LOAD_GAME)
+	if (argument[0] == LOAD_GAME){
 		steps.open(s1, ios::in);
-	else
-		steps.open(s1, ios::out);
+	if (!steps.is_open() || !results.is_open())
+		throw "File not found";
+	}
+	else {
+	steps.open(s1, ios::out);
+	if (!steps.is_open())
+		throw "Error creating file";
+	}
+		
 
 	s1.replace(s1.find("steps.txt"), 11, "results.txt");
-	if (argument[0] == LOAD_GAME)
+	if (argument[0] == LOAD_GAME) {
 		results.open(s1, ios::in);
-	else
+		if (!steps.is_open() || !results.is_open())
+			throw "File not found";
+	}
+	else {
 		results.open(s1, ios::out);
-
-	if (!steps.is_open() || !results.is_open()) {
-		cout << "File Error" << endl;
-		return;
+		if (!results.is_open())
+			throw "Error creating file";
 	}
 }
 

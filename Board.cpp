@@ -14,10 +14,12 @@ void Board::updateStats(const int points,const int lives)
 //reads and updates board from a specific file
 int Board::readBoardFromFile(Position p[], int& count, string fileName)
 {
+	_stats.setPosition(-1, -1);
+	p[0].setPosition(0, 0);
 	fstream f(fileName, ios::in);
 	
 	if (!checkFile(f)) {
-		return 0;
+		throw 0;
 	}
 	char c;
 	int i = 0, j = 0;
@@ -32,10 +34,17 @@ int Board::readBoardFromFile(Position p[], int& count, string fileName)
 		if (c == '\n') {
 			if (i == 0)
 				_width = j;
+			if(i >=80) {
+				throw "Board height is too big";
+			}
 			i++;
 			j = 0; 
 		}
 		else {
+
+			if (j >= 25) {
+				throw"Board width is too big";
+			}
 
 			switch (c) {
 			case symbols[(int)symbols::EMPTY_SPOT_CHAR]:
@@ -45,16 +54,35 @@ int Board::readBoardFromFile(Position p[], int& count, string fileName)
 				_board[i][j] = symbols[(int)symbols::BREADCRUMB_CHAR];
 				maxBreadCrumbs++;
 				break;
+			case  symbols[(int)symbols::GHOST_CHAR]:
+				_board[i][j] = symbols[(int)symbols::GHOST_CHAR];
+				p[++count].setPosition(i, j);
+				if (count == 5) {
+					throw "Too many ghosts on board.";
+				}
+				break;
+			case symbols[(int)symbols::PACMAN_CHAR]:
+				_board[i][j] = symbols[(int)symbols::PACMAN_CHAR];
+				if (p[0].getX() != 0 && p[0].getY() != 0) {
+					throw "Too many Pacmans on board.";
+				}
+				p[0].setPosition(i, j);
+				break;
+			case symbols[(int)symbols::STATS_CHAR]:
+				_board[i][j] = symbols[(int)symbols::STATS_CHAR];
+				if (_stats.getX() != -1 && _stats.getY() != -1) {
+					throw "Too many stats on board.";
+				}
+				_stats.setPosition(i, j);
+				break;
+			case symbols[(int)symbols::WALL_CHAR]:
+				_board[i][j] = symbols[(int)symbols::WALL_CHAR];
+				break;
 			default:
-				_board[i][j] = c;
-				if (c == symbols[(int)symbols::GHOST_CHAR])
-					p[++count].setPosition(i, j);
-				else if (c == symbols[(int)symbols::PACMAN_CHAR])
-					p[0].setPosition(i, j);
-				else if (c == symbols[(int)symbols::STATS_CHAR])
-					_stats.setPosition(i, j);
+				throw "Illegal character on board.";
 				break;
 			}
+
 			if (j == 0) {
 				if (!onboard && c == symbols[(int)symbols::WALL_CHAR] && !gottop) {
 					_top = i;
@@ -70,16 +98,38 @@ int Board::readBoardFromFile(Position p[], int& count, string fileName)
 		if (j == 0) {
 
 			if (onboard && c != symbols[(int)symbols::WALL_CHAR]) {
-				if(!checkNextLine(f, f.tellg()))
+				if (!checkNextLine(f, f.tellg())) {
 					_bottom = i - 1;
+					onboard = false;
+				}
 			}
 		}
 	}
-	_height = i;
-	if (onboard)
+
+	if (onboard) {
 		_bottom = i;
+		_height = i + 1;
+	}
+	else
+		_height = i;
+
+	if (_height == 0) {
+		throw "Board is empty";
+	}
+
+	if (_stats.getY() >= 12) {
+		throw "Not enought room for stats on screen";
+	}
 
 	f.close();
+
+	if (p[0].getX() == 0) {
+		throw "No Pacman on board.";
+	}
+
+	if (_stats.getX() == -1) {
+		throw "No stats on board.";
+	}
 
 	return maxBreadCrumbs;
 }
@@ -136,7 +186,6 @@ void Board::gotoxy(short x, short y)
 //gets all files from folder
 void Board::getFiles()
 {
-	_screens.clear();
 	string path;
 
 	for (const auto& i : std::filesystem::directory_iterator(std::filesystem::current_path()))
@@ -203,4 +252,14 @@ const int Board::getTop()
 const int Board::getBottom()
 {
 	return _bottom;
+}
+
+void Board::addScreen(string name)
+{
+	_screens.push_back(name);
+}
+
+void Board::clearScreens()
+{
+	_screens.clear();
 }
