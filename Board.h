@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>  
+#include <exception>
 
 using namespace std;
 
@@ -42,4 +43,6 @@ public:
 	const int getWidth();
 	const int getTop();
 	const int getBottom();
+	void addScreen(string name);
+	void clearScreens();
 };

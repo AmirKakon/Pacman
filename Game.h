@@ -17,7 +17,7 @@
 #define EXIT_GAME 9
 #define LOAD_GAME "-load"
 #define SAVE_GAME "-save"
-#define Silent_GAME "[-silent]"
+#define Silent_GAME "-silent"
 #define DEAD 'D'
 #define WIN 'W'
 
@@ -34,11 +34,11 @@ private:
 	Fruit _fruit;
 	bool _pause = false;
 	Board _board;
-	Position _initialPositions[5];
+	Position _initialPositions[6];
 	int _ghostCounter = 0;
 	char _difficulty;
 	int _boardCounter = 0;
-	vector<string> argument;
+	vector<string> argument{""};
 	bool _silent = false;
 
 public:
