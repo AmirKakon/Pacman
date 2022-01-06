@@ -5,6 +5,8 @@
 //runs main menu and restarts initialization of game
 void Game::mainMenu()
 {
+	fstream fsteps;
+	fstream fresults;
 	int input;
 	while (true)
 	{
@@ -36,6 +38,7 @@ void Game::mainMenu()
 			input = START_GAME;
 		}
 
+		string s;
 
 		switch (input) {
 		case START_GAME:
@@ -65,23 +68,23 @@ void Game::mainMenu()
 				break;
 			if(argument[0] != LOAD_GAME)
 				setDifficulty();
-			setNextGame();
+			setNextGame(fsteps, fresults, _board.getScreen(_boardCounter));
 			system("cls");
-			start();
+			start(fsteps, fresults);
 			if (argument[0] == LOAD_GAME)
 				return;
 			break;
 		case GET_NAME_OF_FILE:
 			system("cls");
-
 			cout << "Enter file name: ";
-			_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, getFileName());
+			s = getFileName();
+			_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, s);
 			if (!_maxBreadcrumbs)
 				break;
 			setDifficulty();
-			setNextGame();
+			setNextGame(fsteps, fresults, s);
 			system("cls");
-			start();
+			start(fsteps, fresults);
 			break;
 		case INSTRUCTIONS:
 			system("cls");
@@ -115,24 +118,8 @@ void Game::instructions()
 }
 
 //starts the game and runs until game is over.
-void Game::start()
+void Game::start(fstream& fsteps, fstream& fresults)
 {
-	fstream fsteps;
-	fstream fresults;
-
-	if (argument[0] == LOAD_GAME || argument[0] == SAVE_GAME) {
-		try
-		{
-			setFiles(fsteps, fresults, _board.getScreen(_boardCounter));
-		}
-		catch (const char* message)
-		{
-			cout << message << endl;
-			return;
-		}
-	}
-		
-
 	if(!_silent)
 		_board.printBoard(_points, _lives);
 	
@@ -166,8 +153,10 @@ void Game::start()
 				if (argument[0] == SAVE_GAME)
 					setFruitFromFile(fsteps);
 
-				if(!_silent)
+				if (!_silent) {
+					_board.gotoxy(_fruit.getPosition().getX(), _fruit.getPosition().getY());
 					cout << _fruit.getSymbol() << endl;
+				}
 			}
 
 			if (_fruit.timesup())
@@ -277,6 +266,7 @@ void Game::start()
 				if (argument[0] == LOAD_GAME)
 					key = 's';
 			}
+
 		if (_lives == 0) {
 			fsteps.close();
 			fresults.close();
@@ -300,8 +290,6 @@ void Game::start()
 		}
 
 		if (_currBreadcrumbs == _maxBreadcrumbs) {
-			fsteps.close();
-			fresults.close();
 			_boardCounter++;
 			system("cls");
 			if (argument[0] == SAVE_GAME) {
@@ -313,6 +301,8 @@ void Game::start()
 				fresults >> fileTime;
 				if (_gameTime != fileTime || temp != WIN) {
 					cout << "Test Fail" << endl;
+					fsteps.close();
+					fresults.close();
 					return;
 				}
 			}
@@ -322,10 +312,14 @@ void Game::start()
 
 				if (_silent) {
 					cout << "Test Passed" << endl;
+					fsteps.close();
+					fresults.close();
 					return;
 				}
 				
 				cout << "--- You Win! ---\n" << endl;
+				fsteps.close();
+				fresults.close();
 
 				while (true)
 				{
@@ -345,7 +339,8 @@ void Game::start()
 				if (argument[0] == LOAD_GAME)
 					key = 's';
 				_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
-				setNextGame();
+
+				setNextGame(fsteps, fresults, _board.getScreen(_boardCounter));
 				_board.printBoard(_points, _lives);
 
 			}
@@ -450,11 +445,23 @@ void Game::setTimers()
 }
 
 //sets up next game
-void Game::setNextGame()
+void Game::setNextGame(fstream& fsteps, fstream& fresults, string fileName)
 {
 	
 	setInitialPositions();
 	setTimers();
+
+	if (argument[0] == LOAD_GAME || argument[0] == SAVE_GAME) {
+		try
+		{
+			setFiles(fsteps, fresults, fileName);
+		}
+		catch (const char* message)
+		{
+			cout << message << endl;
+			return;
+		}
+	}
 }
 
 //gets specific file from user
@@ -467,6 +474,7 @@ string Game::getFileName()
 	return c;
 }
 
+//gets argument from console
 void Game::getArgument(char* in)
 {
 	if (argument[0] =="")
@@ -475,13 +483,20 @@ void Game::getArgument(char* in)
 	argument.push_back(in);
 }
 
+//sets and opens steps and results file according to current screen
 void Game::setFiles(fstream& steps, fstream& results, string fileName)
 {
 	string s1 = fileName;
+
+	if (steps.is_open()) 
+		steps.close();
+	if (results.is_open())
+		results.close();
+
 	s1.replace(s1.find("screen"), 9, "steps.txt");
 	if (argument[0] == LOAD_GAME){
 		steps.open(s1, ios::in);
-	if (!steps.is_open() || !results.is_open())
+	if (!steps.is_open())
 		throw "File not found";
 	}
 	else {
@@ -494,7 +509,7 @@ void Game::setFiles(fstream& steps, fstream& results, string fileName)
 	s1.replace(s1.find("steps.txt"), 11, "results.txt");
 	if (argument[0] == LOAD_GAME) {
 		results.open(s1, ios::in);
-		if (!steps.is_open() || !results.is_open())
+		if (!results.is_open())
 			throw "File not found";
 	}
 	else {
@@ -504,6 +519,7 @@ void Game::setFiles(fstream& steps, fstream& results, string fileName)
 	}
 }
 
+//sets fruits value and position from file during load mode
 void Game::setFruitFromFile(fstream& steps)
 {
 	int temp;
