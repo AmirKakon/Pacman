@@ -1,14 +1,14 @@
-Steps:
+The Steps file will be saved in the following way:
 
+1. Steps are shown by w-a-s-d-x according to direction NPC is moving. any number value is the value of the fruit and determines the time for the fruit to show up on board.
+2. the order of the movement is as follows: fruit (if is on board) -> pacman -> ghost1 -> ... -> ghostn (1<=n<=4)
+
+example for steps:
 w a d x s d 3 a x s d
 
-Order:
-fruit -> pacman -> ghost1 -> ... -> ghost4 
 
-#:
-value of fruit
-
-
-Results: 
-
-00000
+The Results file will be saved in the following way:  
+1. D or W reffering whether the Pacman died or won the board
+2. '####' reffering to the amount of moves passed since game started
+ 2a. 's' is considered a move and will be counted
+ 2b. when game is paused so is the move counter. 
