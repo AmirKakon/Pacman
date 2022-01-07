@@ -6,12 +6,8 @@
 
 #include "Position.h"
 #include "Board.h"
+#include "Directions.h"
 
-#define LEFT 0
-#define UP 1
-#define DOWN 2
-#define RIGHT 3
-#define STAY 4
 #define ESC 27
 #define BEST 'a'
 #define GOOD 'b'
@@ -22,7 +18,7 @@ class GameObject
 {
 	private:
 		Position _pos;
-		char _direction = 's';
+		char _direction = directions[(int)directions::STAY];
 		int timer = 0;
 		void updateDirection(Position& curr, char direction);
 		void inTunnel(Position& p, Board board);
@@ -30,7 +26,6 @@ class GameObject
 		static bool _silent;
 
 	public:
-		static constexpr char directions[] = { 'a', 'w', 'x', 'd', 's' }; // all possible directions
 		const char getDirection();
 		void setDirection(const char direction);
 		void setPosition(const int x, const  int y);

@@ -44,7 +44,7 @@ private:
 public:
 	void mainMenu();
 	void instructions();
-	void start();
+	void start(fstream& fsteps, fstream& fresults);
 	void userDirection(char& key);
 	bool validUserInput(char key);
 	bool comparePosition(Position& p1, Position& p2);
@@ -53,7 +53,7 @@ public:
 	void setInitialPositions();
 	void setDifficulty();
 	void setTimers();
-	void setNextGame();
+	void setNextGame(fstream& fsteps, fstream& fresults, string fileName);
 	string getFileName();
 	void getArgument(char* in);
 	int _gameTime = 0;
