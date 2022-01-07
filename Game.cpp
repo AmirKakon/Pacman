@@ -59,8 +59,10 @@ void Game::mainMenu()
 			}
 			catch(int num)
 			{
-				cout << "Error: Fail to open file" << endl;
-				continue;
+				if (num == 0) {
+					cout << "Error: Fail to open file" << endl;
+					continue;
+				}
 			}
 
 			
@@ -215,8 +217,10 @@ void Game::start(fstream& fsteps, fstream& fresults)
 					_ghosts[i].moveGameObject(_ghosts[i].getPosition(), _ghosts[i].getDirection(), symbols[(int)symbols::GHOST_CHAR], _board);
 					_board.gotoxy(0, 0);
 
-					if (argument[0] == SAVE_GAME)
+					if (argument[0] == SAVE_GAME) {
+						fsteps.flush();
 						fsteps << _ghosts[i].getDirection() << " ";
+					}
 
 				}
 				fruitturn = !fruitturn;
@@ -256,7 +260,9 @@ void Game::start(fstream& fsteps, fstream& fresults)
 					}
 				}
 				
-				_fruit.changestate();
+				if (_fruit.getState()) {
+					_fruit.changestate();
+				}
 				_fruit.resettimer();
 				if (!_silent)
 					_board.printBoard(_points, _lives);
@@ -268,7 +274,9 @@ void Game::start(fstream& fsteps, fstream& fresults)
 			}
 
 		if (_lives == 0) {
+			fsteps.flush();
 			fsteps.close();
+			fresults.flush();
 			fresults.close();
 			rungame = false;
 			_lives = 3;
@@ -340,6 +348,7 @@ void Game::start(fstream& fsteps, fstream& fresults)
 					key = 's';
 				_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
 
+				_fruit.resetTimer();
 				setNextGame(fsteps, fresults, _board.getScreen(_boardCounter));
 				_board.printBoard(_points, _lives);
 
@@ -347,7 +356,9 @@ void Game::start(fstream& fsteps, fstream& fresults)
 		}
 		if (!_silent)
 			_board.updateStats(_points, _lives);
+	    fsteps.flush();
 	}
+	
 }
 
 //gets direction from user and checks if valid
@@ -370,7 +381,7 @@ void Game::userDirection(char& key)
 //checks that users input is valid
 bool Game::validUserInput(char key)
 {
-	return (key == ESC || key == GameObject::directions[STAY] || key == GameObject::directions[LEFT] || key == GameObject::directions[RIGHT] || key == GameObject::directions[UP] || key == GameObject::directions[DOWN]);
+	return (key == ESC || key == directions[(int)directions::STAY] || key == directions[(int)directions::LEFT] || key == directions[(int)directions::RIGHT] || key == directions[(int)directions::UP] || key == directions[(int)directions::DOWN]);
 }
 
 //comapres between 2 positions - if equal returns true else false

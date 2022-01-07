@@ -70,19 +70,19 @@ void GameObject::updateDirection(Position& curr, char direction)
 	switch (direction)
 	{
 
-	case directions[UP]:
+	case directions[(int)directions::UP]:
 		curr.setPosition(curr.getX() - 1, curr.getY());
 		break;
 
-	case directions[LEFT]:
+	case directions[(int)directions::LEFT]:
 		curr.setPosition(curr.getX(), curr.getY() - 1);
 		break;
 
-	case directions[DOWN]:
+	case directions[(int)directions::DOWN]:
 		curr.setPosition(curr.getX() + 1, curr.getY());
 		break;
 
-	case directions[RIGHT]:
+	case directions[(int)directions::RIGHT]:
 		curr.setPosition(curr.getX(), curr.getY() + 1);
 		break;
 	default:
@@ -171,9 +171,9 @@ bool GameObject::followPacman(Position& ghost, int diffX, int diffY, int& num, B
 		else
 		{
 			//up
-			updateDirection(temp, directions[UP]);
+			updateDirection(temp, directions[(int)directions::UP]);
 			invaliddirection = invalidNPCMove(temp, board);
-			num = UP;
+			num =(int)directions::UP;
 		}
 	}
 	else if (diffX < 0) {
@@ -206,23 +206,23 @@ bool GameObject::followPacman(Position& ghost, int diffX, int diffY, int& num, B
 		else
 		{
 			//down
-			updateDirection(temp, directions[DOWN]);
+			updateDirection(temp, directions[(int)directions::DOWN]);
 			invaliddirection = invalidNPCMove(temp, board);
-			num = DOWN;
+			num = (int)directions::DOWN;
 		}
 	}
 	else {
 		if (diffY > 0) {
 			//left
-			updateDirection(temp, directions[LEFT]);
+			updateDirection(temp, directions[(int)directions::LEFT]);
 			invaliddirection = invalidNPCMove(temp, board);
-			num = LEFT;
+			num = (int)directions::LEFT;
 		}
 		else if (diffY < 0) {
 			//right
-			updateDirection(temp, directions[RIGHT]);
+			updateDirection(temp, directions[(int)directions::RIGHT]);
 			invaliddirection = invalidNPCMove(temp, board);
-			num = RIGHT;
+			num = (int)directions::RIGHT;
 		}
 	}
 	return invaliddirection;
