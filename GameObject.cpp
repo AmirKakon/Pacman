@@ -39,7 +39,7 @@ void GameObject::moveGameObject(Position& p, char direction, char symbol, Board&
 	}
 	
 
-	if (board.getSpot(nextPosition.getX(), nextPosition.getY()) == symbols[(int)symbols::WALL_CHAR] || symbol != symbols[(int)symbols::PACMAN_CHAR]&&(invalidNPCMove(nextPosition, board))) {
+	if (board.getSpot(nextPosition.getX(), nextPosition.getY()) == symbols[(int)symbols::WALL_CHAR] || nextPosition.getX() == board.getTop() - 1 || nextPosition.getX() == board.getHeight()|| symbol != symbols[(int)symbols::PACMAN_CHAR]&&(invalidNPCMove(nextPosition, board))) {
 		if (symbol == symbols[(int)symbols::GHOST_CHAR]) {
 			if (!_silent) {
 				board.gotoxy(p.getX(), p.getY());
