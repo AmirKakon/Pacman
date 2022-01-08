@@ -35,26 +35,26 @@ void Fruit::changestate()
 //ressets the timer for the fruit
 void Fruit::resettimer()
 {
-	timer = 0;
+	ftimer = 0;
 }
 
 //upadates the timer based on the state
 void Fruit::updatetimer()
 {
 	if (onboard)
-		timer -= 1;
+		ftimer -= 1;
 	else
-		timer += 1;
+		ftimer += 1;
 }
 
 //checks if time for fruit to drop
 bool Fruit::timetodrop()
 {
-	return (timer == FRUIT_TIMER && !onboard);
+	return (ftimer == FRUIT_TIMER && !onboard);
 }
 
 //checks if time is up for the fruit
 bool Fruit::timesup()
 {
-	return (timer == 0 && onboard);
+	return (ftimer == 0 && onboard);
 }

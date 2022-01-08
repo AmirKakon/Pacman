@@ -40,6 +40,7 @@ private:
 	int _boardCounter = 0;
 	vector<string> argument{""};
 	bool _silent = false;
+	int _gameTime = 0;
 
 public:
 	void mainMenu();
@@ -49,14 +50,14 @@ public:
 	bool validUserInput(char key);
 	bool comparePosition(Position& p1, Position& p2);
 	void dropFruit();
-	bool invalidFruitPosition(Position p);
+	bool invalidFruitPosition(Position& p);
 	void setInitialPositions();
 	void setDifficulty();
 	void setTimers();
 	void setNextGame(fstream& fsteps, fstream& fresults, string fileName);
-	string getFileName();
+	const string getFileName();
 	void getArgument(char* in);
-	int _gameTime = 0;
+	
 	void setFiles(fstream& steps, fstream& results, string fileName);
 	void setFruitFromFile(fstream& steps);
 };

@@ -11,7 +11,7 @@ class Fruit: public GameObject
 private:
 	int _value = 0;
 	char _symbol;
-	int timer = 0;
+	int ftimer = 0;
 	bool onboard = false;
 
 public:

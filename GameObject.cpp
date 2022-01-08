@@ -26,7 +26,7 @@ Position& GameObject::getPosition()
 }
 
 //moves object on board according to direction user pressed. and updates position of gameobject.
-void GameObject::moveGameObject(Position& p, char direction, char symbol, Board board)
+void GameObject::moveGameObject(Position& p, char direction, char symbol, Board& board)
 {
 	if (direction == 's')
 		return;
@@ -34,9 +34,12 @@ void GameObject::moveGameObject(Position& p, char direction, char symbol, Board 
 	Position nextPosition(p);
 
 	updateDirection(nextPosition, direction);
-	inTunnel(nextPosition, board);
+	if (symbol == symbols[(int)symbols::PACMAN_CHAR]) {
+		inTunnel(nextPosition, board);
+	}
+	
 
-	if (board.getSpot(nextPosition.getX(), nextPosition.getY()) == symbols[(int)symbols::WALL_CHAR] || nextPosition.getX() == board.getTop() - 1 || nextPosition.getX() == board.getHeight()) {
+	if (board.getSpot(nextPosition.getX(), nextPosition.getY()) == symbols[(int)symbols::WALL_CHAR] || symbol != symbols[(int)symbols::PACMAN_CHAR]&&(invalidNPCMove(nextPosition, board))) {
 		if (symbol == symbols[(int)symbols::GHOST_CHAR]) {
 			if (!_silent) {
 				board.gotoxy(p.getX(), p.getY());
@@ -91,7 +94,7 @@ void GameObject::updateDirection(Position& curr, char direction)
 }
 
 //checks if the position is in a spot of a tunnel opening and sets spot accordingly
-void GameObject::inTunnel(Position& p, Board board)
+void GameObject::inTunnel(Position& p, Board& board)
 {
 	if (p.getX() == board.getTop()) {
 		p.setX(board.getHeight() - 1);
@@ -107,7 +110,7 @@ void GameObject::inTunnel(Position& p, Board board)
 }
 
 //returns a random direction from directions list
-void GameObject::getRandDirection(const Position& p, const Position& pacman, char difficulty, Board board)
+void GameObject::getRandDirection(const Position& p, const Position& pacman, char difficulty, Board& board)
 {
 	bool invaliddirection = false;
 	int num;
@@ -138,7 +141,7 @@ void GameObject::getRandDirection(const Position& p, const Position& pacman, cha
 }
 
 //gets direction for the ghost towards pacmans current position
-bool GameObject::followPacman(Position& ghost, int diffX, int diffY, int& num, Board board)
+bool GameObject::followPacman(Position& ghost, int diffX, int diffY, int& num, Board& board)
 {
 	bool invaliddirection = true;
 	Position temp = ghost;
@@ -229,7 +232,7 @@ bool GameObject::followPacman(Position& ghost, int diffX, int diffY, int& num, B
 }
 
 //checks if the ghost will go to an invalid spot.
-bool GameObject::invalidNPCMove(Position p, Board board)
+bool GameObject::invalidNPCMove(Position& p, Board& board)
 {
 	if (board.getSpot(p.getX(), p.getY()) == symbols[(int)symbols::WALL_CHAR] || p.getX() == board.getTop() || p.getX() == board.getHeight() - 1 || p.getY() == 0 || p.getY() == board.getWidth() - 1)
 		return true;

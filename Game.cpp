@@ -267,7 +267,9 @@ void Game::start(fstream& fsteps, fstream& fresults)
 				if (!_silent)
 					_board.printBoard(_points, _lives);
 				setInitialPositions();
+				ghostturn = false;
 				firstMove = true;
+				fruitturn = false;
 				key = 'p';
 				if (argument[0] == LOAD_GAME)
 					key = 's';
@@ -298,6 +300,12 @@ void Game::start(fstream& fsteps, fstream& fresults)
 		}
 
 		if (_currBreadcrumbs == _maxBreadcrumbs) {
+			if (_fruit.getState()) {
+				_fruit.changestate();
+			}
+			ghostturn = false;
+			firstMove = true;
+			fruitturn = false;
 			_boardCounter++;
 			system("cls");
 			if (argument[0] == SAVE_GAME) {
@@ -348,9 +356,10 @@ void Game::start(fstream& fsteps, fstream& fresults)
 					key = 's';
 				_maxBreadcrumbs = _board.readBoardFromFile(_initialPositions, _ghostCounter, _board.getScreen(_boardCounter));
 
-				_fruit.resetTimer();
+				_fruit.resettimer();
 				setNextGame(fsteps, fresults, _board.getScreen(_boardCounter));
-				_board.printBoard(_points, _lives);
+				if (!_silent)
+					_board.printBoard(_points, _lives);
 
 			}
 		}
@@ -413,7 +422,7 @@ void Game::dropFruit()
 }
 
 //checks if position of fruit is invalid
-bool Game::invalidFruitPosition(Position p)
+bool Game::invalidFruitPosition(Position& p)
 {
 	bool res = (comparePosition(p, _pacman.getPosition()) || _board.getSpot(p.getX(), p.getY()) == symbols[(int)symbols::WALL_CHAR] || _board.getSpot(p.getX(), p.getY()) == symbols[(int)symbols::EMPTY_SPACE_CHAR]);
 
@@ -476,7 +485,7 @@ void Game::setNextGame(fstream& fsteps, fstream& fresults, string fileName)
 }
 
 //gets specific file from user
-string Game::getFileName()
+const string Game::getFileName()
 {
 	cin.get();
 	string c;

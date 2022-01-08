@@ -21,8 +21,8 @@ class GameObject
 		char _direction = directions[(int)directions::STAY];
 		int timer = 0;
 		void updateDirection(Position& curr, char direction);
-		void inTunnel(Position& p, Board board);
-		bool invalidNPCMove(Position p, Board board);
+		void inTunnel(Position& p, Board& board);
+		bool invalidNPCMove(Position& p, Board& board);
 		static bool _silent;
 
 	public:
@@ -30,9 +30,9 @@ class GameObject
 		void setDirection(const char direction);
 		void setPosition(const int x, const  int y);
 		Position& getPosition();
-		void moveGameObject(Position& p, char direction, char symbol, Board board);
-		void getRandDirection(const Position& p, const Position& pacman, char difficulty, Board board);
-		bool followPacman(Position& ghost, int diffX, int diffY, int& num, Board board);
+		void moveGameObject(Position& p, char direction, char symbol, Board& board);
+		void getRandDirection(const Position& p, const Position& pacman, char difficulty, Board& board);
+		bool followPacman(Position& ghost, int diffX, int diffY, int& num, Board& board);
 		void resetTimer();
 		void updateTimer();
 		void setTimer(const char difficulty);
